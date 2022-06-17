@@ -1,11 +1,13 @@
-# MOVER
-<b> Human-Aware Object Placement for Visual Environment Reconstruction. (CVPR2022)</b>\
+# Human-Aware Object Placement for Visual Environment Reconstruction. (CVPR2022)
+<b> </b>
 [[Project Page](https://mover.is.tue.mpg.de)] [[Paper](https://openaccess.thecvf.com/content/CVPR2022/papers/Yi_Human-Aware_Object_Placement_for_Visual_Environment_Reconstruction_CVPR_2022_paper.pdf)] [[MPI Project Page](https://ps.is.mpg.de/publications/yi_mover_2022)]
 [[Youtube Video](https://youtu.be/waLfe8KiNoY)]
 
-![Teaser MOVER](assets/teaser.png)
+<!-- ![Teaser MOVER](assets/teaser.png) -->
 
-|                       ![Teaser GIF](assets/MOVER_teaser_clip.gif)                       |
+<img src="assets/teaser.png" alt="drawing" width="1000"/>
+
+|                       <img src="assets/MOVER_teaser_clip.gif" alt="drawing" width="1080"/>                       |
 | :----------------------------------------------------------------------------------------: |
 | _3D Scene and Humans Reconstruction Results from a single RGB video_ |
 
