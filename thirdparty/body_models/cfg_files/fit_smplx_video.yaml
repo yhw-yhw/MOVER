@@ -1,0 +1,236 @@
+dataset: 'openpose_video'
+batch_size: 2
+joints_to_ign:
+    - 1
+    - 9
+    - 12
+data_folder: "data"
+output_folder: 'smplx_debug'
+prior_folder: 'priors'
+model_folder: 'models'
+result_folder: 'results'
+gender: "neutral"
+model_type: 'smplx'
+# Flag for using the GPU
+use_cuda: True
+float_dtype: "float32"
+use_joints_conf: True
+use_pca: True
+use_hands: True
+use_face: True
+flat_hand_mean: False
+# The number of mixture components for the pose prior
+num_gaussians: 8
+body_prior_type: 'l2'
+left_hand_prior_type: l2
+right_hand_prior_type: l2
+jaw_prior_type: 'l2'
+focal_length: 5000
+num_pca_comps: 12
+# The constant for the robust loss function
+rho: 100
+interpenetration: False #True
+df_cone_height: 0.0001
+# Upper arms and Spine 2
+# Neck and jaw
+ign_part_pairs: ["9,16", "9,17", "6,16", "6,17", "1,2", "12,22"]
+penalize_outside: True
+max_collisions: 128
+# LBFGS with line search
+optim_type: 'lbfgsls'
+ftol: 1e-9
+gtol: 1e-9
+lr: 1.0
+# Max number of optimization iterations
+maxiters: 30
+interactive: True
+visualize: False
+# Relative change in loss value
+body_pose_prior_weights:
+    - 4.04e2
+    - 4.04e2
+    - 57.4e0
+    - 4.78e0
+    - 4.78e0
+    - 4.78e0
+    - 4.78e0
+coll_loss_weights:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.01
+    - 1.0
+    - 1.0
+    - 1.0
+shape_weights:
+    - 1.0e2
+    - 5.0e1
+    - 1.0e1
+    - 0.5e1
+    - 0.5e1
+    - 0.5e1
+    - 0.5e1
+expr_weights:
+    - 1.0e2
+    - 5.0e1
+    - 1.0e1
+    - 0.5e1
+    - 0.5e1
+    - 0.5e1
+    - 0.5e1
+hand_pose_prior_weights:
+    - 4.04e2
+    - 4.04e2
+    - 57.4
+    - 4.78
+    - 4.78
+    - 4.78
+    - 4.78
+jaw_pose_prior_weights:
+    # First phase
+    - 4.04e03,4.04e04,4.04e04
+    # Second phase
+    - 4.04e03,4.04e04,4.04e04
+    # Third phase
+    - 574,5740,5740
+    # Fourth phase
+    - 47.8,478,478
+    # Fifth phase
+    - 47.8,478,478
+    # Sixth phase
+    - 47.8,478,478
+    # Seventh phase
+    - 47.8,478,478
+hand_joints_weights:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.1
+    - 2.0
+    - 2.0
+    - 2.0
+face_joints_weights:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 2.0
+    - 2.0
+    - 2.0
+data_weights:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+
+use_vposer: True
+vposer_ckpt: "vposer"
+
+# HDSR
+img_path: "/ps/scratch/hyi/HCI_dataset/holistic_scene_human/image_high_resolution/000001.jpg"
+pare_dir: "/ps/scratch/hyi/HCI_dataset/holistic_scene_human/mv_smplify_result_pare3d_opfeetAnkles"
+save_dir: "./debug"
+scene_result_dir: "/ps/scratch/hyi/HCI_dataset/holistic_scene_human/scene_understanding_det_thr0.7"
+cam_inc_fn: "/ps/scratch/hyi/HCI_dataset/holistic_scene_human/cam_K.txt"
+start_stage: 0
+idx: 1
+calib_path: "/ps/scratch/hyi/HCI_dataset/holistic_scene_human/smplifyx_test/process_58_scene_init"
+width: 640
+height: 360 
+visualization: False
+debug: False
+
+## ground plane support loss
+ground_plane_support: False
+ground_contact_support: False
+ground_contact_path: None
+body_segments_dir: "/ps/scratch/multi-ioi/data/PROX/quantitative/body_segments"
+
+# ADD LOSS WEIGHT
+gp_support_weights_init: 1e4
+# Ground plane and object penetration in Stage6
+gp_support_weights: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1e4
+    - 1e2
+
+# Ground contact loss in Stage6
+gp_contact_weights: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1e2
+    - 1e0
+
+update_body: True
+# update scene
+update_scene: False
+scene: False
+scene_loss_weight: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1e-2 #1e0 #1e-1, 1e2 same
+    - 1e0 #1e0
+
+ordinal_depth: False
+ordinal_depth_loss_weight: 
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 2e-2
+    - 2e-4
+
+###################
+sdf_penetration: False
+inner_robust_sdf: 0.2
+sdf_penetration_loss_weight: # dynamic loss weight
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 5e-2 #500 is enough for some occlusion for fixed body
+    - 5e-2
+
+# Contact loss in Stage7
+###################
+contact: False
+contact_angle: 45
+rho_contact: 5e-2
+contact_loss_weights:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1e4
+    - 1e4
+
+video_smooth: True
+constant_velocity: True
+# use sum: loss gradient will be large, if sample happens to be wrong
+loss_use_sum: True
+smooth_2d_weight: 0.1
+smooth_3d_weight: 10.0
+
+# Total3D setting.
+USE_MASK: True
+UPDATE_CAMERA_EXTRIN: True # use body to measure the 3D scene!
+USE_CAD_SIZE: False # TODO: modified into yaml
+USE_ONE_DOF_SCALE: False
+UPDATE_OBJ_SCALE: True
+USE_INIT_SCENE: True
