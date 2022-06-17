@@ -1,0 +1,9 @@
+setuptools
+numpy
+matplotlib
+scipy
+pyopengl
+pillow
+pyzmq
+pyyaml
+opencv-python
