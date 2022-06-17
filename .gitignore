@@ -1,0 +1,10 @@
+*__pycache__*
+debug/
+__pycache__
+eval
+.history/
+thirdparty/scene_initialization
+thirdparty/HPS_prepare_input
+thirdparty/HPS_initialization
+data/smpl-x_model/
+data/smpl-x_model*
