@@ -354,4 +354,21 @@ DEFAULT_LOSS_WEIGHTS = {  # Loss weights.
             "lw_contact_coarse": 1e5,
         },
     },
+
+    "debug_10000": { # ! only estimate camera and gp plane
+        "loss_weight": {    
+            "lw_scale": 0, 
+            "lw_proj_bbox": 0, 
+            "lw_offscreen": 0,
+            "lw_ground_objs": 0, 
+            "lw_collision_objs": 0, 
+            "lw_sil": 0,  
+            "lw_edge": 0, 
+            "lw_gp_contact": 1e3, 
+            "lw_gp_support": 0, 
+            "lw_sdf": 0,  
+            "lw_depth": 0,
+            "lw_prox_contact": 0,
+        },
+    },
 }

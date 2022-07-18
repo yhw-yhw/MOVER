@@ -115,6 +115,7 @@ def create_camera(camera_type='persp', **kwargs):
 def create_multicameras(xml_folder='', **kwargs):
     from os import listdir
     from os.path import isfile, join
+    # import pdb;pdb.set_trace()
     onlyfiles = sorted([join(xml_folder, f) for f in listdir(xml_folder) if isfile(join(xml_folder, f))])       # take only files
     
     return [CalibratedUserCamera(**{**kwargs, 'calib_path':f}) for f in onlyfiles]

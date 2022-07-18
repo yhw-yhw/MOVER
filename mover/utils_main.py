@@ -107,6 +107,7 @@ def add_tb_message(tb_logger, losses, loss_dict, loss_dict_weighted, all_iters):
             if t_k in loss_dict_weighted:
                 tmp_loss_dict_w[t_k] = loss_dict_weighted[t_k][sample_idx]
         tmp_loss_dict_w['total_loss'] = losses[sample_idx]
+        # import pdb;pdb.set_trace()
         save_scalars(tb_logger, f'loss_{sample_idx}', tmp_loss_dict, all_iters)
         save_scalars(tb_logger, f'loss_weight_{sample_idx}', tmp_loss_dict_w, all_iters)
 
@@ -172,7 +173,8 @@ def get_filter_human_poses(tmp_save_dir, stage3_dict, opt, st_2_fit_body_use_dic
                 all_obj_list, 
                 posa_dir,
                 st2_render_body_dir,
-                img_fn_list
+                img_fn_list,
+                flag=None,
                 ):
     
     filter_open = stage3_dict['filter_open']
@@ -181,6 +183,7 @@ def get_filter_human_poses(tmp_save_dir, stage3_dict, opt, st_2_fit_body_use_dic
     input_fps = opt.input_fps
     fps_list = recalculate_segment(stage3_dict['fps_list'], input_fps) 
     
+    import pdb;pdb.set_trace()
     ####################################
     ### video segmentations
     ####################################
@@ -193,7 +196,13 @@ def get_filter_human_poses(tmp_save_dir, stage3_dict, opt, st_2_fit_body_use_dic
     end_frame = min((s_i + 1) * perframes, vertices_np.shape[0])
     ## end of optimization settings
     
-    tmp_verts_path = os.path.join(tmp_save_dir, f'verts_filter.pickle')
+    
+    if flag is None:
+        tmp_verts_path = os.path.join(tmp_save_dir, f'verts_filter.pickle')
+    else:
+        tmp_verts_path = os.path.join(tmp_save_dir, f'verts_filter_{flag}.pickle')
+    import pdb;pdb.set_trace()
+    
     if not opt.preload_body or not os.path.exists(tmp_verts_path): # always run.
         logger.info('recalculate filter body verts')
         # body filter: shape is bxnx3
@@ -259,10 +268,14 @@ def get_filter_human_poses(tmp_save_dir, stage3_dict, opt, st_2_fit_body_use_dic
         ori_body2scene_conf, filter_obj_list, filter_contact_list, filter_img_list
     
 def create_template_dir(random_sample_order, save_dir, original_batch_size):
-    if random_sample_order == -1:
-        template_save_dir = os.path.join(save_dir+ '/../../template', f'{original_batch_size}')
+    if 'obj_-1' in save_dir:
+        tmp = '/../../template'
     else:
-        template_save_dir = os.path.join(save_dir+ '/../../template', f'{original_batch_size}random{random_sample_order}')
+        tmp = '/../template'
+    if random_sample_order == -1:
+        template_save_dir = os.path.join(save_dir+ tmp, f'{original_batch_size}')
+    else:
+        template_save_dir = os.path.join(save_dir+ tmp, f'{original_batch_size}random{random_sample_order}')
     logger.info(f'template save dir: {template_save_dir}')
 
     tmp_save_dir = os.path.join(template_save_dir, f'preload_img')
@@ -753,6 +766,14 @@ def get_setting_scene(stage3_kind_flag, opt=None):
         st3_pid_list = [10127, 17000]
         segments_list = [1] # each element defines how many segments for each video.
         fps_list = [6]
+    elif stage3_kind_flag == 2: # ! for optimize camera pose and ground plane.
+        filter_open = False # True
+        video_process = False
+        st3_lr_list = [2e-3]
+        st3_num_iterations_list = [400] 
+        st3_pid_list = [opt.process_id]
+        segments_list = [1]
+        fps_list = [30] 
     else:
         logger.info('wrong stage3_kind_flag')
         assert False
@@ -769,7 +790,7 @@ def get_setting_scene(stage3_kind_flag, opt=None):
 def load_scene_init(scene_init_model, model, load_all_scene, update_gp_camera, noise_kind=-1, noise_value=0.0):
     logger.info('load estimated camera and ground plane !!!')
     logger.info(f'from {scene_init_model}')
-    assert os.path.exists(scene_init_model)
+    
     if scene_init_model is not None and os.path.exists(scene_init_model):
         logger.info('load model:',scene_init_model)
         if not load_all_scene: # only update camera and gp

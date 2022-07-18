@@ -186,157 +186,184 @@ def get_overlaped_with_human_objs_idxs(self, frame_id):
 
     return filtered_overlap_idx_list
                     
-def assign_contact_body_to_objs(self, ply_file_list, contact_file_list, ftov, contact_parts='body', debug=True, output_folder=None, assign2obj=True):
+def assign_contact_body_to_objs(self, ply_file_list, contact_file_list, ftov, contact_parts='body', debug=True, output_folder=None, assign2obj=True, reload_contact=False):
     device=torch.device('cuda')
-    accumulate_contact_v = []
-    accumulate_contact_vn = []
-    
-    # save all contact verts
-    tmp_all_accumulate_contact_v = []
-    tmp_all_accumulate_contact_vn = []
 
-    prox_contact_index = torch.Tensor(self.get_prox_contact_labels(contact_parts=contact_parts)).cuda().long()
-    
-    logger.info(f'recalculate contact info')
+    if reload_contact: # only for contact feet vertices.
+        if output_folder is not None:
+            torch.cat(accumulate_contact_v).unsqueeze(0).type(torch.float).cpu().numpy()
 
-    contact_cnt = 0
-    contact_cnt_list = []
+            accumulate_contact_feet_vertices = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_vertices.npy'), \
+                    )
+            accumulate_contact_verts_normals = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_verts_normals.npy'), \
+                    )
+            accumulate_contact_each_idx = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_each_idx.npy'), \
+                    )
+            tmp_all_accumulate_contact_vertices = np.load(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_vertices.npy'), \
+                    )
+            tmp_all_accumulate_contact_verts_normals = np.load(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_verts_normals.npy'), \
+                    )
 
-    assign_obj_list = []
-    assign_obj_idxs_list = []
-    ori_verts_parallel_ground, ori_verts_parallel_ground_list = self.get_verts_object_parallel_ground(return_all=True)
+        self.register_buffer(f'accumulate_contact_{contact_parts}_vertices', torch.from_numpy(accumulate_contact_feet_vertices).cuda()) # B, N, 3
+        self.register_buffer(f'accumulate_contact_{contact_parts}_verts_normals', torch.from_numpy(accumulate_contact_verts_normals).cuda()) # B, N, 3
+        self.register_buffer(f'accumulate_contact_{contact_parts}_each_idx', torch.from_numpy(accumulate_contact_each_idx).cuda())
+        
+        self.register_buffer(f'tmp_all_accumulate_contact_{contact_parts}_vertices', \
+            torch.from_numpy(tmp_all_accumulate_contact_vertices).cuda()) # B, N, 3
+        self.register_buffer(f'tmp_all_accumulate_contact_{contact_parts}_verts_normals', \
+            torch.from_numpy(tmp_all_accumulate_contact_verts_normals).cuda()) # B, N, 3
 
-    frame_id = 0
-    for ply_file, contact_file in tqdm(zip(ply_file_list, contact_file_list), desc=f'compute contact & assign bodys to different objs: to {output_folder}'):
-        with torch.no_grad():
-            mesh = Mesh(filename=ply_file)
-            v = torch.tensor(mesh.v, device=device)
-            f = torch.tensor(mesh.f.astype(np.int64), device=device)
-            body_triangles = torch.index_select(v.unsqueeze(0), 1,f.view(-1)).view(1, -1, 3, 3)
-            # Calculate the edges of the triangles
-            # Size: BxFx3
-            edge0 = body_triangles[:, :, 1] - body_triangles[:, :, 0]
-            edge1 = body_triangles[:, :, 2] - body_triangles[:, :, 0]
-            # Compute the cross product of the edges to find the normal vector of
-            # the triangle
-            body_normals = torch.cross(edge0, edge1, dim=2)
-            # Normalize the result to get a unit vector
-            body_normals = body_normals / \
-                torch.norm(body_normals, 2, dim=2, keepdim=True)
-            # compute the vertex normals from faces normals: face to vertices.
-            body_v_normals = torch.mm(ftov, body_normals.squeeze().type(torch.float32))
-            body_v_normals = body_v_normals / \
-                torch.norm(body_v_normals, 2, dim=1, keepdim=True)
-            # normal should point outside
+        return True
+    else:
+        accumulate_contact_v = []
+        accumulate_contact_vn = []
+        
+        # save all contact verts
+        tmp_all_accumulate_contact_v = []
+        tmp_all_accumulate_contact_vn = []
 
-            contact_labels = np.load(contact_file)
+        prox_contact_index = torch.Tensor(self.get_prox_contact_labels(contact_parts=contact_parts)).cuda().long()
+        
+        logger.info(f'recalculate contact info')
 
-            contact_labels = torch.Tensor(contact_labels > 0.5).type(torch.uint8).cuda()
+        contact_cnt = 0
+        contact_cnt_list = []
 
-            ### pure posa results
-            tmp_all_accumulate_contact_v.append(v[contact_labels[:, 0]])
-            tmp_all_accumulate_contact_vn.append(body_v_normals[contact_labels[:, 0]])
-            ### end of pure posa results
+        assign_obj_list = []
+        assign_obj_idxs_list = []
+        ori_verts_parallel_ground, ori_verts_parallel_ground_list = self.get_verts_object_parallel_ground(return_all=True)
 
-            tmp_contac_labels = torch.zeros(contact_labels.shape).type(torch.uint8).cuda()
-            tmp_contac_labels[prox_contact_index] = True
-            contact_labels = contact_labels & tmp_contac_labels
+        frame_id = 0
+        for ply_file, contact_file in tqdm(zip(ply_file_list, contact_file_list), desc=f'compute contact & assign bodys to different objs: to {output_folder}'):
+            with torch.no_grad():
+                mesh = Mesh(filename=ply_file)
+                v = torch.tensor(mesh.v, device=device)
+                f = torch.tensor(mesh.f.astype(np.int64), device=device)
+                body_triangles = torch.index_select(v.unsqueeze(0), 1,f.view(-1)).view(1, -1, 3, 3)
+                # Calculate the edges of the triangles
+                # Size: BxFx3
+                edge0 = body_triangles[:, :, 1] - body_triangles[:, :, 0]
+                edge1 = body_triangles[:, :, 2] - body_triangles[:, :, 0]
+                # Compute the cross product of the edges to find the normal vector of
+                # the triangle
+                body_normals = torch.cross(edge0, edge1, dim=2)
+                # Normalize the result to get a unit vector
+                body_normals = body_normals / \
+                    torch.norm(body_normals, 2, dim=2, keepdim=True)
+                # compute the vertex normals from faces normals: face to vertices.
+                body_v_normals = torch.mm(ftov, body_normals.squeeze().type(torch.float32))
+                body_v_normals = body_v_normals / \
+                    torch.norm(body_v_normals, 2, dim=1, keepdim=True)
+                # normal should point outside
 
-            accumulate_contact_v.append(v[contact_labels[:, 0]])
-            accumulate_contact_vn.append(body_v_normals[contact_labels[:, 0]])
+                contact_labels = np.load(contact_file)
+
+                contact_labels = torch.Tensor(contact_labels > 0.5).type(torch.uint8).cuda()
+
+                ### pure posa results
+                tmp_all_accumulate_contact_v.append(v[contact_labels[:, 0]])
+                tmp_all_accumulate_contact_vn.append(body_v_normals[contact_labels[:, 0]])
+                ### end of pure posa results
+
+                tmp_contac_labels = torch.zeros(contact_labels.shape).type(torch.uint8).cuda()
+                tmp_contac_labels[prox_contact_index] = True
+                contact_labels = contact_labels & tmp_contac_labels
+
+                accumulate_contact_v.append(v[contact_labels[:, 0]])
+                accumulate_contact_vn.append(body_v_normals[contact_labels[:, 0]])
 
 
-            # detected body have overlap to the objects;
-            verts_parallel_ground_list = ori_verts_parallel_ground_list
-                    
-            if contact_parts in ['body', 'handArm'] and assign2obj:
-                logger.info('assign body to objs')
-
-                overlap_objs_by_detection = self.get_overlaped_with_human_objs_idxs(frame_id)
-                overlap_objs_by_detection_flag = []
-                for tmp_i in range(len(verts_parallel_ground_list)):
-                    if tmp_i in overlap_objs_by_detection:
-                        overlap_objs_by_detection_flag.append(True)
-                    else:
-                        overlap_objs_by_detection_flag.append(False)
+                # detected body have overlap to the objects;
+                verts_parallel_ground_list = ori_verts_parallel_ground_list
                         
-                if ADD_HAND_CONTACT:
-                    pass
-                else:
-                    assign_obj = self.body2objs(v[contact_labels[:, 0]], body_v_normals[contact_labels[:, 0]],\
-                        verts_parallel_ground_list, name=ply_file, objs_class_list=self.size_cls, contact_parts=contact_parts, \
-                        depth_observe_filter=overlap_objs_by_detection_flag)
-                    assign_obj_idxs = torch.ones(v[contact_labels[:, 0]].shape[0]) * assign_obj
+                if contact_parts in ['body', 'handArm'] and assign2obj:
+                    logger.info('assign body to objs')
 
-                logger.info(f'assign to obj {assign_obj}')
-                assign_obj_list.append(assign_obj)
-                assign_obj_idxs_list.append(assign_obj_idxs)
+                    overlap_objs_by_detection = self.get_overlaped_with_human_objs_idxs(frame_id)
+                    overlap_objs_by_detection_flag = []
+                    for tmp_i in range(len(verts_parallel_ground_list)):
+                        if tmp_i in overlap_objs_by_detection:
+                            overlap_objs_by_detection_flag.append(True)
+                        else:
+                            overlap_objs_by_detection_flag.append(False)
+                            
+                    if ADD_HAND_CONTACT:
+                        pass
+                    else:
+                        assign_obj = self.body2objs(v[contact_labels[:, 0]], body_v_normals[contact_labels[:, 0]],\
+                            verts_parallel_ground_list, name=ply_file, objs_class_list=self.size_cls, contact_parts=contact_parts, \
+                            depth_observe_filter=overlap_objs_by_detection_flag)
+                        assign_obj_idxs = torch.ones(v[contact_labels[:, 0]].shape[0]) * assign_obj
 
-            contact_cnt += v[contact_labels[:, 0]].shape[0]
-            contact_cnt_list.append(contact_cnt)
-            frame_id += 1
+                    logger.info(f'assign to obj {assign_obj}')
+                    assign_obj_list.append(assign_obj)
+                    assign_obj_idxs_list.append(assign_obj_idxs)
 
-    if debug and torch.cat(accumulate_contact_v).shape[0] != 0:
-        tmp_cv = torch.cat(accumulate_contact_v).cpu().numpy()
-        tmp_cvn = torch.cat(accumulate_contact_vn).cpu().numpy()
-        if output_folder is not None:
-            template_save_fn = os.path.join(output_folder, f'contact_mesh_points_{contact_parts}.ply')
-        
-        # export camera CS contact points
-        camera_mat = self.get_cam_extrin().squeeze().detach().cpu().numpy()
-        self.viz_verts(tmp_cv, template_save_fn, verts_n=tmp_cvn, camera_mat=camera_mat)
-        
-        if contact_parts in ['body', 'handArm'] :
-            all_color = []
-            for n_i, assign_idx in enumerate(assign_obj_list):
-                n_p = accumulate_contact_v[n_i].shape[0]
-                if assign_idx != -1:
-                    color_idx = self.size_cls[assign_idx].cpu().numpy().astype(np.long)
-                    color = np.clip(np.array(define_color_map[color_idx.item()]) + assign_idx * 0.03, 0.01, 0.99)
-                else:
-                    color = np.array([1.0, 1.0, 1.0])
-                color = color[None].repeat(n_p, 0)
-                all_color.append(color)
-            if len(all_color) > 0:
-                vert_colors = (np.concatenate(all_color).reshape(-1, 3) * 255.0).astype(np.uint8)
-            else:
-                vert_colors = None
+                contact_cnt += v[contact_labels[:, 0]].shape[0]
+                contact_cnt_list.append(contact_cnt)
+                frame_id += 1
+
+        if debug and torch.cat(accumulate_contact_v).shape[0] != 0:
+            tmp_cv = torch.cat(accumulate_contact_v).cpu().numpy()
+            tmp_cvn = torch.cat(accumulate_contact_vn).cpu().numpy()
             if output_folder is not None:
-                template_save_fn = os.path.join(output_folder, f'contact_mesh_points_{contact_parts}_color.ply')
-            self.viz_verts(tmp_cv, template_save_fn, verts_c=vert_colors, camera_mat=camera_mat)
+                template_save_fn = os.path.join(output_folder, f'contact_mesh_points_{contact_parts}.ply')
+            
+            # export camera CS contact points
+            camera_mat = self.get_cam_extrin().squeeze().detach().cpu().numpy()
+            self.viz_verts(tmp_cv, template_save_fn, verts_n=tmp_cvn, camera_mat=camera_mat)
+            
+            if contact_parts in ['body', 'handArm'] :
+                all_color = []
+                for n_i, assign_idx in enumerate(assign_obj_list):
+                    n_p = accumulate_contact_v[n_i].shape[0]
+                    if assign_idx != -1:
+                        color_idx = self.size_cls[assign_idx].cpu().numpy().astype(np.long)
+                        color = np.clip(np.array(define_color_map[color_idx.item()]) + assign_idx * 0.03, 0.01, 0.99)
+                    else:
+                        color = np.array([1.0, 1.0, 1.0])
+                    color = color[None].repeat(n_p, 0)
+                    all_color.append(color)
+                if len(all_color) > 0:
+                    vert_colors = (np.concatenate(all_color).reshape(-1, 3) * 255.0).astype(np.uint8)
+                else:
+                    vert_colors = None
+                if output_folder is not None:
+                    template_save_fn = os.path.join(output_folder, f'contact_mesh_points_{contact_parts}_color.ply')
+                self.viz_verts(tmp_cv, template_save_fn, verts_c=vert_colors, camera_mat=camera_mat)
 
-        all_contact_v = torch.cat(tmp_all_accumulate_contact_v).cpu().numpy()
-        all_contact_vn = torch.cat(tmp_all_accumulate_contact_vn).cpu().numpy()
+            all_contact_v = torch.cat(tmp_all_accumulate_contact_v).cpu().numpy()
+            all_contact_vn = torch.cat(tmp_all_accumulate_contact_vn).cpu().numpy()
+            if output_folder is not None:
+                template_save_fn = os.path.join(output_folder, f'contact_mesh_points_{contact_parts}_oriPOSA.ply')
+            self.viz_verts(all_contact_v, template_save_fn, verts_n=all_contact_vn, camera_mat=camera_mat)
+
         if output_folder is not None:
-            template_save_fn = os.path.join(output_folder, f'contact_mesh_points_{contact_parts}_oriPOSA.ply')
-        self.viz_verts(all_contact_v, template_save_fn, verts_n=all_contact_vn, camera_mat=camera_mat)
+            np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_vertices.npy'), \
+                    torch.cat(accumulate_contact_v).unsqueeze(0).type(torch.float).cpu().numpy())
+            np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_verts_normals.npy'), \
+                    torch.cat(accumulate_contact_vn).unsqueeze(0).cpu().numpy())
+            np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_each_idx.npy'), \
+                    torch.Tensor(contact_cnt_list).cuda().type(torch.long).cpu().numpy())
+            np.save(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_vertices.npy'), \
+                    torch.cat(tmp_all_accumulate_contact_v).unsqueeze(0).type(torch.float).cpu().numpy())
+            np.save(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_verts_normals.npy'), \
+                    torch.cat(tmp_all_accumulate_contact_vn).unsqueeze(0).cpu().numpy())
 
-    if output_folder is not None:
-        np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_vertices.npy'), \
-                torch.cat(accumulate_contact_v).unsqueeze(0).type(torch.float).cpu().numpy())
-        np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_verts_normals.npy'), \
-                torch.cat(accumulate_contact_vn).unsqueeze(0).cpu().numpy())
-        np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_each_idx.npy'), \
-                torch.Tensor(contact_cnt_list).cuda().type(torch.long).cpu().numpy())
-        np.save(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_vertices.npy'), \
-                torch.cat(tmp_all_accumulate_contact_v).unsqueeze(0).type(torch.float).cpu().numpy())
-        np.save(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_verts_normals.npy'), \
-                torch.cat(tmp_all_accumulate_contact_vn).unsqueeze(0).cpu().numpy())
-
-    self.register_buffer(f'accumulate_contact_{contact_parts}_vertices', torch.cat(accumulate_contact_v).unsqueeze(0).type(torch.float)) # B, N, 3
-    self.register_buffer(f'accumulate_contact_{contact_parts}_verts_normals', torch.cat(accumulate_contact_vn).unsqueeze(0)) # B, N, 3
-    self.register_buffer(f'accumulate_contact_{contact_parts}_each_idx', torch.Tensor(contact_cnt_list).cuda().type(torch.long))
-    
-    self.register_buffer(f'tmp_all_accumulate_contact_{contact_parts}_vertices', \
-        torch.cat(tmp_all_accumulate_contact_v).unsqueeze(0).type(torch.float)) # B, N, 3
-    self.register_buffer(f'tmp_all_accumulate_contact_{contact_parts}_verts_normals', \
-        torch.cat(tmp_all_accumulate_contact_vn).unsqueeze(0)) # B, N, 3
-    
-    if contact_parts in ['body', 'handArm']  and assign2obj:
-        if output_folder is not None:
-            np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_body2obj_idx.npy'), \
-                    torch.cat(assign_obj_idxs_list).unsqueeze(0).type(torch.long).cpu().numpy())
-        self.register_buffer(f'accumulate_contact_{contact_parts}_body2obj_idx', torch.cat(assign_obj_idxs_list).unsqueeze(0).type(torch.long))
+        self.register_buffer(f'accumulate_contact_{contact_parts}_vertices', torch.cat(accumulate_contact_v).unsqueeze(0).type(torch.float)) # B, N, 3
+        self.register_buffer(f'accumulate_contact_{contact_parts}_verts_normals', torch.cat(accumulate_contact_vn).unsqueeze(0)) # B, N, 3
+        self.register_buffer(f'accumulate_contact_{contact_parts}_each_idx', torch.Tensor(contact_cnt_list).cuda().type(torch.long))
+        
+        self.register_buffer(f'tmp_all_accumulate_contact_{contact_parts}_vertices', \
+            torch.cat(tmp_all_accumulate_contact_v).unsqueeze(0).type(torch.float)) # B, N, 3
+        self.register_buffer(f'tmp_all_accumulate_contact_{contact_parts}_verts_normals', \
+            torch.cat(tmp_all_accumulate_contact_vn).unsqueeze(0)) # B, N, 3
+        
+        if contact_parts in ['body', 'handArm']  and assign2obj:
+            if output_folder is not None:
+                np.save(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_body2obj_idx.npy'), \
+                        torch.cat(assign_obj_idxs_list).unsqueeze(0).type(torch.long).cpu().numpy())
+            self.register_buffer(f'accumulate_contact_{contact_parts}_body2obj_idx', torch.cat(assign_obj_idxs_list).unsqueeze(0).type(torch.long))
     
     return True
 

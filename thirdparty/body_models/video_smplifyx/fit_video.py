@@ -1044,11 +1044,10 @@ def fit_multi_view(img,
                     **kwargs)
                 body_optimizer.zero_grad()
                 
-                # import pdb;pdb.set_trace()
                 if dataset_name != 'Pose2Room':
                     # ! warning set weight for each stage
                     ### only works in 2D projected loss.
-                    import pdb;pdb.set_trace()
+                    # import pdb;pdb.set_trace()
                     curr_weights['data_weight'] = data_weight
                     curr_weights['bending_prior_weight'] = (
                         3.17 * curr_weights['body_pose_weight'])
@@ -1253,7 +1252,7 @@ def fit_multi_view(img,
                         )
         tpose_vertices = tpose_body.vertices[0].detach().cpu().numpy()
         # write out body height
-        from body_models.smplifyx.utils_mics.misc_utils import get_body_height
+        from ..smplifyx.utils_mics.misc_utils import get_body_height
         body_height = get_body_height(tpose_vertices, body_model.faces_tensor.detach().cpu().numpy())
         with open(f'{result_fn[0][:-4]}_{body_height}.txt', 'w') as fout:
             fout.write(f'body height: {body_height}')

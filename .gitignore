@@ -4,9 +4,13 @@ __pycache__
 eval
 .history/
 install/mesh
-thirdparty/scene_initialization
+# thirdparty/scene_initialization
 thirdparty/HPS_prepare_input
-thirdparty/HPS_initialization
+# thirdparty/HPS_initialization
 data/smpl-x_model/
 data/smpl-x_model*
 useless/
+*/source*.sh
+thirdparty/HPS_initialization/tmp
+thirdparty/scene_initialization/Total3DUnderstanding/out
+thirdparty/scene_initialization/Total3DUnderstanding/useless

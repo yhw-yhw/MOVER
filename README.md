@@ -32,6 +32,7 @@ Please follow the [Installation Instruction](docs/Installation.md) to setup all 
 <br/>
 
 ## Data
+<!-- it stores in /is/cluster/work/hyi/dataset/MOVER_dataset -->
 
 Please register [SMPL-X](https://smpl-x.is.tue.mpg.de/) at first, and then download ```smpl-x_model.tar.gz``` from our [webpage](https://mover.is.tue.mpg.de), put it under ```${MOVER_REPORSITORY}/data/```.
 
@@ -66,8 +67,23 @@ cd ./demo
 bash run_rendering.sh
 ```
 
-and we will also release the scene initialization, HPS Initialization and camera & ground plane optimization soon.
+### Scene Initialization
 
+See more details in [scene initialization document](docs/Dataset.md)
+
+### HPS Initialization
+
+* Prepare the input.
+
+* Batch-wise SMPLify-X under a normal perspective camera with Identity Rotation Matrix
+
+* Run POSA to get the contact vertices for each human.
+
+* Optimize the camera pose and the height of the ground plane with contacted feet.
+
+* Optimize Batch-wise SMPLify-X under new optimized camera pose and ground plane constraints.
+
+<!-- and we will also release the scene initialization, HPS Initialization and camera & ground plane optimization soon. -->
 
 <br/>
 

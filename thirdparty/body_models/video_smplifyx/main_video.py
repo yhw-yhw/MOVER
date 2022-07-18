@@ -183,6 +183,7 @@ def main_video(scene_prior, tb_debug, tb_logger, pre_smplx_model, not_running=Fa
     # Create the camera object
     # cam is a list
     xml_folder = args.get('calib_path', None)
+    print('run: ', xml_folder)
     if xml_folder is not None:    
         if xml_folder != '':
             cameras = create_multicameras(xml_folder=xml_folder,
@@ -368,7 +369,6 @@ def main_video(scene_prior, tb_debug, tb_logger, pre_smplx_model, not_running=Fa
     os.makedirs(curr_img_folder, exist_ok=True)
     
     # ground_plane_value = scene_prior['ground_plane']
-
     if not_running:
         # modify for output
         fitting_body_use_dict = {}

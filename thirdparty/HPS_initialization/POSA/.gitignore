@@ -1,0 +1,5 @@
+**/src/__pycache__
+*.pyc
+*.pyc
+**/.idea
+.git

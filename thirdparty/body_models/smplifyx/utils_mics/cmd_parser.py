@@ -35,6 +35,11 @@ def parse_config(argv=None):
                                       description=description,
                                       prog='SMPLifyX')
 
+    parser.add_argument('--single',
+                        type=lambda arg: arg.lower() == 'true',
+                        default=False,
+                        help='Print info messages during the process')
+
     parser.add_argument('--data_folder',
                         default=os.getcwd(),
                         help='The directory that contains the data.')
@@ -103,7 +108,7 @@ def parse_config(argv=None):
                         help='The type of camera used')
     parser.add_argument('--calib_path', type=str, default='calibration',
                         help='The folder where calibration files (xml) are stored')
-    parser.add_argument('--calib_path_oriJ3d', type=str, default='calibration',
+    parser.add_argument('--calib_path_oriJ3d', type=str, default='None',
                         help='The folder where calibration files (xml) are stored')
     parser.add_argument('--optim_jaw', default=True,
                         type=lambda x: x.lower() in ['true', '1'],

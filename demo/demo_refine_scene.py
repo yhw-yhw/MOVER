@@ -193,6 +193,7 @@ if __name__ == "__main__":
     ####################################
     #### contact info for human-scene interaction.
     ####################################
+    import pdb;pdb.set_trace()
     if opt.contact:
         st3_ftov = st_2_fit_body_use_dict['ftov']
         st3_contact_verts_ids = st_2_fit_body_use_dict['contact_verts_ids']
