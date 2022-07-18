@@ -17,7 +17,9 @@ We provide the codebase for
 
 # Run Batch-wise SMPLify-X
 
+```
 bash run_video.sh ${save_dir}/${video_name} ${video_length}
+```
 
 # Run POSA on Estimated HPS 
 
