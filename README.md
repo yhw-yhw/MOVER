@@ -69,9 +69,11 @@ bash run_rendering.sh
 
 ### Scene Initialization
 
-See more details in [scene initialization document](docs/Dataset.md)
+See more details in [scene initialization document](thirdparty/scene_initialization/readme.md)
 
-### HPS Initialization
+### Human Pose ans Shape (HPS) Initialization
+
+See more details in [HPS initialization document](thirdparty/HPS_initialization/readme.md)
 
 <!-- and we will also release the scene initialization, HPS Initialization and camera & ground plane optimization soon. -->
 
