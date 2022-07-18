@@ -73,16 +73,6 @@ See more details in [scene initialization document](docs/Dataset.md)
 
 ### HPS Initialization
 
-* Prepare the input.
-
-* Batch-wise SMPLify-X under a normal perspective camera with Identity Rotation Matrix
-
-* Run POSA to get the contact vertices for each human.
-
-* Optimize the camera pose and the height of the ground plane with contacted feet.
-
-* Optimize Batch-wise SMPLify-X under new optimized camera pose and ground plane constraints.
-
 <!-- and we will also release the scene initialization, HPS Initialization and camera & ground plane optimization soon. -->
 
 <br/>
