@@ -5,9 +5,9 @@
 
 <!-- ![Teaser MOVER](assets/teaser.png) -->
 
-<img src="assets/teaser.png" alt="drawing" width="1000"/>
+<img src="assets/teaser.png" alt="drawing" width="720"/>
 
-|                       <img src="assets/MOVER_teaser_clip.gif" alt="drawing" width="1080"/>                       |
+|<img src="assets/MOVER_teaser_clip.gif" alt="drawing" width="720"/>|
 | :----------------------------------------------------------------------------------------: |
 | _3D Scene and Humans Reconstruction Results from a single RGB video_ |
 

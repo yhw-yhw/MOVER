@@ -1,0 +1,1 @@
+Namespace(bs=512, ckpt_steps=0, data_mode='kp', decay_gamma=0.9, flow_norm=1, log_steps=100, lr=0.0001, num_blocks=2, num_epochs=80, num_features=512, num_workers=8, optimizer='adam', out_dir='outputs', out_name='0516_kp_3', pose_norm=1, root='data', time_window=3, use_tfboard=1)

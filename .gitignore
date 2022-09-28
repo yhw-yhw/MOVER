@@ -11,4 +11,9 @@ useless/
 thirdparty/HPS_initialization/tmp
 thirdparty/scene_initialization/Total3DUnderstanding/out
 thirdparty/scene_initialization/Total3DUnderstanding/useless
-thirdparty/HPS_initialization/HPS_prepare_input
+thirdparty/HPS_initialization/HPS_prepare_input_old
+### below is under refactorization code for get the new camera and ground.
+thirdparty/HPS_initialization/demo*.py
+thirdparty/HPS_initialization/main_*.py
+thirdparty/HPS_initialization/run_es*
+thirdparty/HPS_initialization/run_smp*

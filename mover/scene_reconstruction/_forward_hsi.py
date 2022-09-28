@@ -60,9 +60,14 @@ def forward_hsi(self, verts_list, verts_parallel_ground_list,
                 else:
                     filter_ply_file_list = ply_file_list
                     filter_contact_file_list = contact_file_list
+                
+                # TODO: reload
                 self.input_feet_contact_flag = self.assign_contact_body_to_objs(filter_ply_file_list, filter_contact_file_list, ftov, \
                                 contact_parts='feet', \
-                                debug=DEBUG_LOSS_OUTPUT, output_folder=template_save_dir)
+                                debug=False, output_folder=template_save_dir, reload_contact=True)
+                                # ! Warning: let reload_contact=True for debuging.
+                                # debug=True, output_folder=template_save_dir)
+                                # debug=DEBUG_LOSS_OUTPUT, output_folder=template_save_dir)
             accumulate_contact_feet_vertices_world = self.get_person_wrt_world_coordinates(self.accumulate_contact_feet_vertices)
             
             # init for ground plane. 

@@ -5,7 +5,7 @@
 
 We provide the codebase for 
 
-* Prepare the input. [TODO]
+* Prepare the input. 
 
 * Batch-wise SMPLify-X under a normal perspective camera with Identity Rotation Matrix
 
@@ -14,6 +14,14 @@ We provide the codebase for
 * Optimize the camera pose and the height of the ground plane with contacted feet. [TODO]
 
 * Optimize Batch-wise SMPLify-X under new optimized camera pose and ground plane constraints. [TODO]
+
+# Prepare the input of SMPLify-X for a video
+
+see more details in [HPS_prepare_input](thirdparty/HPS_initialization/HPS_prepare_input/README.md)
+
+```
+cd HPS_prepare_input && bash run.sh
+```
 
 # Run Batch-wise SMPLify-X
 

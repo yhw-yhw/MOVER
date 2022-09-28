@@ -186,23 +186,19 @@ def get_overlaped_with_human_objs_idxs(self, frame_id):
 
     return filtered_overlap_idx_list
                     
-def assign_contact_body_to_objs(self, ply_file_list, contact_file_list, ftov, contact_parts='body', debug=True, output_folder=None, assign2obj=True, reload_contact=False):
+def assign_contact_body_to_objs(self, ply_file_list, contact_file_list, ftov, contact_parts='body', \
+        debug=True, output_folder=None, assign2obj=True, reload_contact=False):
+    
     device=torch.device('cuda')
 
+    import pdb;pdb.set_trace()
     if reload_contact: # only for contact feet vertices.
         if output_folder is not None:
-            torch.cat(accumulate_contact_v).unsqueeze(0).type(torch.float).cpu().numpy()
-
-            accumulate_contact_feet_vertices = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_vertices.npy'), \
-                    )
-            accumulate_contact_verts_normals = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_verts_normals.npy'), \
-                    )
-            accumulate_contact_each_idx = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_each_idx.npy'), \
-                    )
-            tmp_all_accumulate_contact_vertices = np.load(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_vertices.npy'), \
-                    )
-            tmp_all_accumulate_contact_verts_normals = np.load(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_verts_normals.npy'), \
-                    )
+            accumulate_contact_feet_vertices = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_vertices.npy'))
+            accumulate_contact_verts_normals = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_verts_normals.npy'))
+            accumulate_contact_each_idx = np.load(os.path.join(output_folder, f'accumulate_contact_{contact_parts}_each_idx.npy'))
+            tmp_all_accumulate_contact_vertices = np.load(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_vertices.npy'))
+            tmp_all_accumulate_contact_verts_normals = np.load(os.path.join(output_folder, f'tmp_all_accumulate_contact_{contact_parts}_verts_normals.npy'))
 
         self.register_buffer(f'accumulate_contact_{contact_parts}_vertices', torch.from_numpy(accumulate_contact_feet_vertices).cuda()) # B, N, 3
         self.register_buffer(f'accumulate_contact_{contact_parts}_verts_normals', torch.from_numpy(accumulate_contact_verts_normals).cuda()) # B, N, 3
